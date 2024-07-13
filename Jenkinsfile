@@ -18,14 +18,42 @@ pipeline {
 				sh 'docker  version'
 			}
 		}
+		stage('Compile') {
+			steps {
+				sh 'mvn clean compile'
+			}
+		}
 		stage('Test') {
 			steps {
-				echo 'Test'
+				sh 'mvn test'
 			}
 		}
 		stage('Integration Test') {
 			steps {
-				echo 'Integration Test'
+				sh 'mvn failsafe:integration-test failsafe:verify'
+			}
+		}
+		stage('Package') {
+			steps {
+				sh 'mvn package -DskipTests'
+			}
+		}
+		stage('Build Docker image') {
+			steps {
+				// "docker build -t hoangducminh/currency-exchange-devops:$env.BUILD_TAG"
+				script {
+					dockerImage = docker.build("hoangducminh/currency-exchange-devops:${env.BUILD_TAG}")
+				}
+			}
+		}
+		stage('Push Docker image') {
+			steps {
+				script {
+					docker.withRegistry('','dockerhub') {
+						dockerImage.push();
+						dockerImage.push('latest');
+					}
+				}
 			}
 		}
 	}
@@ -41,3 +69,4 @@ pipeline {
 		}
 	}
 }
+ 
