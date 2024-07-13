@@ -14,8 +14,8 @@ pipeline {
 	stages {
 		stage('Build') {
 			steps {
-				echo 'mvn --version'
-				echo 'docker version'
+				sh 'mvn --version'
+				sh 'docker  version'
 			}
 		}
 		stage('Test') {
